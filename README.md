@@ -11,6 +11,7 @@ Attributes are in the `ts3` keyspace.
 * version - Specifies the version to download and set up version-specific directories. This is an override attribute so the default attributes get set correctly with it.
 * arch - Specifies the architecture to download based on the node.kernel.machine. Valid values are amd64 or x86.
 * url - Download URL to use. Note that the teamspeak releases are in a version specific subdirectory that isn't detected automatically, and must be modified manually when updating the version to use.
+* sha256sum - Hash of sha256 checksums for the tarball, one per architecture.
 * skip_runit_installation - Do not automatically install runit before installing the runit service (use this only if you install runit in a different recipe or installation will fail at this step)
 
 The client recipe doesn't use any attributes. Yet?
@@ -20,7 +21,9 @@ USAGE
 
 Include the teamspeak3 recipe on a node's run list to have it download and install Teamspeak 3. The software is under active development and upgrades are not handled automatically. The related attributes (see above) need to be modified for new versions, and those will be downloaded and installed. The database will be preserved for upgrades.
 
-The Teamspeak server process will be started as a runit service. When the service is started for the first time, the runit log output (by default /etc/sv/teamspeak3/log/main/current) will have the relevant password information to manage the Teamspeak server.
+Under Ubuntu and Debian, the Teamspeak server process will be started as a runit service. When the service is started for the first time, the runit log output (by default /etc/sv/teamspeak3/log/main/current) will have the relevant password information to manage the Teamspeak server.
+
+Under Fedora, a systemd unit named teamspeak3.service will be installed. Logs will be directed to journald.
 
 LICENSE AND AUTHOR
 ==================
