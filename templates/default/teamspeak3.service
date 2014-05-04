@@ -1,0 +1,11 @@
+[Unit]
+Description=TeamSpeak3 server
+After=network.target
+
+[Service]
+ExecStart=<%= @base %>/ts3server_wrapper
+User=<%= @user %>
+Group=<%= @group %>
+
+[Install]
+WantedBy=multi-user.target
