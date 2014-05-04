@@ -17,7 +17,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-base = "teamspeak3-server_linux-#{node['ts3']['arch']}"
+arch = node['ts3']['arch']
+base = "teamspeak3-server_linux-#{arch}"
 basever = "#{base}-#{node['ts3']['version']}"
 
 service "teamspeak3" do
@@ -29,7 +30,20 @@ cached_installation_file = File.join(Chef::Config[:file_cache_path], "#{basever}
 remote_file cached_installation_file do
   source node['ts3']['url']
   mode 0644
-  not_if { ::FileTest.exists?(cached_installation_file) }
+  checksum node['ts3']['sha256sum'][arch]
+
+  notifies :create, "ruby_block[validate_ts3_checksum]", :immediately
+end
+
+ruby_block "validate_ts3_checksum" do
+  action :nothing
+  block do
+    require 'digest'
+    checksum = Digest::SHA256.file(cached_installation_file).hexdigest
+    if checksum != node['ts3']['sha256sum'][arch]
+      raise "Downloaded TS3 checksum does not match expected value."
+    end
+  end
 end
 
 u = user "teamspeak-server" do
@@ -49,7 +63,7 @@ execute "install_ts3" do
   cwd "/srv"
   user "teamspeak-server"
   command "tar zxf #{ cached_installation_file }"
-  not_if { ::FileTest.exists?("/srv/#{base}/ts3server_linux_#{node['ts3']['arch']}") }
+  not_if { ::FileTest.exists?("/srv/#{base}/ts3server_linux_#{arch}") }
 end
 
 link "/srv/teamspeak3" do
