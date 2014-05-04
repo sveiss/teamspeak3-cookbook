@@ -19,6 +19,7 @@
 
 base = "teamspeak3-server_linux-#{node['ts3']['arch']}"
 basever = "#{base}-#{node['ts3']['version']}"
+username = 'teamspeak-server'
 
 service "teamspeak3" do
   action :nothing
@@ -32,7 +33,7 @@ remote_file cached_installation_file do
   not_if { ::FileTest.exists?(cached_installation_file) }
 end
 
-u = user "teamspeak-server" do
+u = user username do
   action :nothing
   system true
   home "/srv/#{base}"
@@ -41,13 +42,13 @@ end
 u.run_action(:create)
 
 directory "/srv/#{base}" do
-  owner "teamspeak-server"
-  group "teamspeak-server"
+  owner username
+  group username
 end
 
 execute "install_ts3" do
   cwd "/srv"
-  user "teamspeak-server"
+  user username
   command "tar zxf #{ cached_installation_file }"
   not_if { ::FileTest.exists?("/srv/#{base}/ts3server_linux_#{node['ts3']['arch']}") }
 end
@@ -72,6 +73,33 @@ when "arch"
   service "teamspeak3" do
     pattern "ts3server_linux_amd64"
     action [:enable, :start]
+  end
+when "fedora"
+  if node[:platform_version].to_i >= 16
+    template "/etc/systemd/system/teamspeak3.service" do
+      source "teamspeak3.service"
+      owner "root"
+      group "root"
+      mode "0644"
+      variables(
+        :base => "/srv/#{base}",
+        :user => username,
+        :group => username
+      )
+    end
+
+    # distribution ts3server_minimal_runscript.sh almost does the right thhing...
+    cookbook_file "/srv/#{base}/ts3server_wrapper" do
+      owner username
+      group username
+      mode "0755"
+
+      source "ts3server_wrapper.sh"
+    end
+
+    service "teamspeak3" do
+      action [:enable, :start]
+    end
   end
 end
 

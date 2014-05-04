@@ -20,7 +20,9 @@ USAGE
 
 Include the teamspeak3 recipe on a node's run list to have it download and install Teamspeak 3. The software is under active development and upgrades are not handled automatically. The related attributes (see above) need to be modified for new versions, and those will be downloaded and installed. The database will be preserved for upgrades.
 
-The Teamspeak server process will be started as a runit service. When the service is started for the first time, the runit log output (by default /etc/sv/teamspeak3/log/main/current) will have the relevant password information to manage the Teamspeak server.
+Under Ubuntu and Debian, the Teamspeak server process will be started as a runit service. When the service is started for the first time, the runit log output (by default /etc/sv/teamspeak3/log/main/current) will have the relevant password information to manage the Teamspeak server.
+
+Under Fedora, a systemd unit named teamspeak3.service will be installed. Logs will be directed to journald.
 
 LICENSE AND AUTHOR
 ==================
